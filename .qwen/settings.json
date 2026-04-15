@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir *)",
+      "Bash(pip install *)",
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(python3 *)",
+      "Bash(dir *)",
+      "Bash(\"c:\\users\\wajiz.pk\\.gemini\\antigravity\\scratch\\plumber-lead-auditor\\venv\\scripts\\python.exe\" *)"
+    ]
+  },
+  "$version": 3
+}

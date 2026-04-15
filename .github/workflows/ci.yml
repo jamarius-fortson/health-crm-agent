@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.11"
+      - run: uv pip install -e ".[dev]" --system
+      - run: ruff check healthcare_agent tests
+      - run: mypy --strict healthcare_agent
+      - run: bandit -r healthcare_agent -ll
+      - run: semgrep --config auto healthcare_agent
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: hcrm
+          POSTGRES_PASSWORD: hcrm_password
+          POSTGRES_DB: hcrm_db_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hcrm"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.11"
+      - run: uv pip install -e ".[dev]" --system
+      - run: pytest tests/ -v --cov=healthcare_agent --cov-report=xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: "3.11"
+      - run: uv pip install -e ".[dev]" --system
+      - run: pytest tests/compliance/ -v
+      - run: pytest tests/safety/ -v

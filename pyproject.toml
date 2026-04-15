@@ -1,0 +1,126 @@
+[project]
+name = "healthcare-crm-agent"
+version = "0.1.0"
+description = "HIPAA-compliant autonomous front-office and care-coordination platform for small-to-mid healthcare practices"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+readme = "README.md"
+
+dependencies = [
+    "langgraph>=0.2.50",
+    "langchain-core>=0.3",
+    "langchain-anthropic>=0.1",
+    "fhir.resources>=8.0",
+    "hl7>=0.4",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0",
+    "asyncpg>=0.30",
+    "aiosqlite>=0.20",
+    "alembic>=1.14",
+    "pgvector>=0.3",
+    "cryptography>=43",
+    "aws-encryption-sdk>=3.1",
+    "redis>=5.0",
+    "arq>=0.26",
+    "twilio>=9.3",
+    "paubox-python>=0.0.2",
+    "python-jose[cryptography]>=3.3",
+    "authlib>=1.3",
+    "structlog>=24.4",
+    "opentelemetry-api>=1.27",
+    "opentelemetry-sdk>=1.27",
+    "opentelemetry-instrumentation-fastapi>=0.48b0",
+    "prometheus-client>=0.21",
+    "typer>=0.12",
+    "httpx>=0.27",
+    "boto3>=1.35",
+    "azure-identity>=1.19",
+    # "azure-openai>=0.1",
+    "openai>=1.50",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "respx>=0.21",
+    "testcontainers[postgres,redis]>=4.8",
+    "ruff>=0.7",
+    "mypy>=1.12",
+    "bandit>=1.8",
+    "semgrep>=1.90",
+    "coverage[toml]>=7.6",
+]
+
+[project.scripts]
+hcrm = "healthcare_agent.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["healthcare_agent"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "respx>=0.21",
+    "testcontainers[postgres,redis]>=4.8",
+    "ruff>=0.7",
+    "mypy>=1.12",
+    "bandit>=1.8",
+    "semgrep>=1.90",
+    "coverage[toml]>=7.6",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+    "hl7.*",
+    "paubox.*",
+    "fhir.resources.*",
+    "aws_encryption_sdk.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["healthcare_agent"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
